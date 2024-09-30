@@ -1,0 +1,18 @@
+#!/usr/bin/env pybricks-micropython
+# *******************IMPORTS*******************
+
+from robot import Robot
+from pybricks.parameters import Port, Direction
+
+# *******************MAIN PROGRAM*******************
+
+robot = Robot(wheelDiameter=5.6, axleTrack=11.0)
+
+robot.clf.run_angle(500, 500)  
+robot.clf.stop()  
+
+robot.clf = Motor(Port.A, positive_direction=Direction.CLOCKWISE) 
+robot.verify() 
+robot.clf.run_angle(500, 500) 
+
+robot.clf.stop()  

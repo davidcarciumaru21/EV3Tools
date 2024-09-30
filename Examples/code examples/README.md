@@ -1,0 +1,1 @@
+First tutorial is based of learning you how declare a robot object adn play with it. You acces the switch between motors and you make motors run by an angle.
