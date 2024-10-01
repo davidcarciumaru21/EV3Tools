@@ -1,18 +1,40 @@
 #!/usr/bin/env pybricks-micropython
 # *******************IMPORTS*******************
 
-from robot import Robot
+from robot import Robot #! This is the main module. DO NOT DELETE THIS !
+from pybricks.ev3devices import Motor, ColorSensor, TouchSensor, GyroSensor
 from pybricks.parameters import Port, Direction
 
 # *******************MAIN PROGRAM*******************
 
-robot = Robot(wheelDiameter=5.6, axleTrack=11.0)
+# The dict down bellow can be modified for you specific names and settings of the motors
+motorsDict = {
+    "lf": Motor(Port.A, positive_direction=Direction.CLOCKWISE),  
+    "clf": Motor(Port.B, positive_direction=Direction.COUNTERCLOCKWISE),
+    "crt": Motor(Port.C, positive_direction=Direction.COUNTERCLOCKWISE),  
+    "motorD": None
+}
+
+# The dict down bellow can be modified for you specific names of the sensors
+sensorsDict = {
+    "color1": ColorSensor(Port.S1),  
+    "touch": TouchSensor(Port.S2),  
+    "gyro": GyroSensor(Port.S3),     
+    "port4": None 
+}
+
+"""
+In the code bellow you initialize the robot object.
+This is very important. 
+Whithout this line the robot can't move the robot, or even try to do anything with it.
+"""
+
+robot = Robot(56.0, 117.5, motors=motorsDict, sensors=sensorsDict)
+
+"""
+Makes the robot move the clf motor wich is th cental left motor. 
+Remember, the names can be modifed in the specific dict.
+"""
 
 robot.clf.run_angle(500, 500)  
-robot.clf.stop()  
-
-robot.clf = Motor(Port.A, positive_direction=Direction.CLOCKWISE) 
-robot.verify() 
-robot.clf.run_angle(500, 500) 
-
 robot.clf.stop()  
