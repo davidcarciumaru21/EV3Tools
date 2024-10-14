@@ -1,121 +1,11 @@
-#!/usr/bin/env pybricks-micropython
-
 from pybricks.hubs import EV3Brick
 from pybricks.ev3devices import Motor, ColorSensor, GyroSensor, UltrasonicSensor
 from pybricks.parameters import Port, Direction
 from pybricks.robotics import DriveBase
-
-class PortError(Exception):
-    def __init__(self, message: str, errorCode: str):
-        self.message = message
-        self.errorCode = errorCode
-        super().__init__(message)
-
-    def __str__(self):
-        return f"{self.message} (Error Code: {self.errorCode})"
-
-class LackOfInput(Exception):
-    def __init__(self, message: str, errorCode: str):
-        self.message = message
-        self.errorCode = errorCode
-        super().__init__(message)
-
-    def __str__(self):
-        return f"{self.message} (Error Code: {self.errorCode})"
-        
-class UnknownOrientation(Exception):
-    def __init__(self, message: str, errorCode: str):
-        self.message = message
-        self.errorCode = errorCode
-        super().__init__(message)
-
-    def __str__(self):
-        return f"{self.message} (Error Code: {self.errorCode})"
-        
-class UnknownSpeed(Exception):
-    def __init__(self, message: str, errorCode: str):
-        self.message = message
-        self.errorCode = errorCode
-        super().__init__(message)
-
-    def __str__(self):
-        return f"{self.message} (Error Code: {self.errorCode})"
-
-class UnknownStopMethod(Exception):
-    def __init__(self, message: str, errorCode: str):
-        self.message = message
-        self.errorCode = errorCode
-        super().__init__(message)
-
-    def __str__(self):
-        return f"{self.message} (Error Code: {self.errorCode})"
-
-class Ev3DriveBase(DriveBase):
-    def __init__(self, leftMotor: Motor, rightMotor: Motor, wheelDiameter: float, axleTrack: float):
-        super().__init__(leftMotor, rightMotor, wheelDiameter, axleTrack)
-        self.leftMotor = leftMotor
-        self.rightMotor = rightMotor
-        
-    def move(self, orientation: str, degrees: int):
-        if orientation == "forward":
-            self.straight(degrees)
-        elif orientation == "backward":
-            self.straight(-degrees)
-        else:
-            raise UnknownOrientation(f"{orientation} is not a valid orientation", "300")
-    
-    def moveToOrientation(self, orientation: int):
-        try:
-            self.turn(orientation)
-        except:
-            raise UnknownOrientation(f"{orientation} is not a valid orientation", "300")
-        
-    def startMoving(self, speed: int, orientation: int):
-        try: 
-            orientation = int(orientation)
-        except:
-            raise UnknownOrientation(f"{orientation} is not a valid orientation", "300")
-        try:
-            speed = int(speed)
-        except:
-            raise UnknownSpeed(f"{speed} is not a valid speed", "301")
-            
-        self.drive(speed, orientation)
-
-    def setMovementMotorsTo(self, stopOrStall: str):
-        try:
-            if stopOrStall == "stop":
-                self.leftMotor.stop()
-                self.rightMotor.stop()
-            elif stopOrStall == "hold":
-                self.leftMotor.hold()
-                self.rightMotor.hold()
-            else:
-                raise UnknownStopMethod(f"{stopOrStall} is not a valid stop method", "302")
-        except:
-            raise UnknownStopMethod(f"Error in stopping or holding motors", "302")
-
-    """    
-    def moveBySpeeds(self, degrees: int, speed1: int, speed2: int):
-        def runLeftMotor():
-            self.leftMotor.run_angle(degrees, speed1)
-    
-        def runRightMotor():
-            self.rightMotor.run_angle(degrees, speed2)
-    
-        leftThread = _thread.start_new_thread(runLeftMotor, ())
-        rightThread = _thread.start_new_thread(runRightMotor, ())
-
-    def driveBySpeeds(self, speed1: int, speed2: int):
-        def runLeftMotor():
-            self.leftMotor.run(degrees, speed1)
-    
-        def runRightMotor():
-            self.rightMotor.run(degrees, speed2)
-    
-        leftThread = _thread.start_new_thread(runLeftMotor, ())
-        rightThread = _thread.start_new_thread(runRightMotor, ())
-    """
+from pybricks.parameters import Color
+from errors import *
+from ev3Drivebase import *
+import time
         
 class Robot:
     def __init__(self, wheelDiameter: int, axleTrack: int, motors: dict, sensors: dict, driveBaseName: str):
@@ -126,6 +16,8 @@ class Robot:
         self.driveBaseName = driveBaseName
         self.errorLog = []
         self.init()
+        self.ev3 = EV3Brick()  # Initialize EV3 brick here
+        self.ev3.screen.clear()
 
     def init(self):
         try:
@@ -153,23 +45,56 @@ class Robot:
                 print(error)
             raise self.errorLog[0]
 
+    # Modified to use the Ev3DriveBase instead of DriveBase
     def declareDriveBase(self, leftMotor: Motor, rightMotor: Motor,
                          straightSpeed=100, straightAcceleration=100, turnRate=100, turnAcceleration=100):
+        # Use Ev3DriveBase instead of DriveBase
         setattr(self, self.driveBaseName, Ev3DriveBase(leftMotor, rightMotor, self.wheelDiameter, self.axleTrack))
         self.drivebase = getattr(self, self.driveBaseName)
         self.drivebase.settings(straightSpeed, straightAcceleration, turnRate, turnAcceleration)
+        
+    """
+    def displayFace(self, face: object, displayTime: float):
+        try:
+            self.ev3.screen.load_image(face)  # Use self.ev3 to access the EV3 brick
+        except:
+            raise UnknownFace(f"{face} is not a valid face to display", "400")
+        try:
+            time.sleep(displayTime)  # Use the time module for delays
+        except:
+            raise UnknownTimeArgument(f"{displayTime} is not a valid time to sleep", "401")
+        self.ev3.screen.clear()  # Correct clearing method for the EV3 screen
+        
+    def displayFaceForever(self, face: object):
+        try:
+            self.ev3.screen.load_image(face)  # Use self.ev3 to access the EV3 brick
+        except:
+            raise UnknownFace(f"{face} is not a valid face to display", "400")
 
-motors = {
-    'leftMotor': Motor(Port.A, Direction.CLOCKWISE),
-    'rightMotor': Motor(Port.B, Direction.CLOCKWISE),
-    'mediumMotor': Motor(Port.C, Direction.CLOCKWISE),
-}
+    """
 
-sensors = {
-    'colorSensor': ColorSensor(Port.S1),
-    'ultrasonicSensor': UltrasonicSensor(Port.S2),
-    'gyroSensor': GyroSensor(Port.S3),
-}
-
-robot = Robot(56, 152, motors, sensors, "d")
-robot.declareDriveBase(robot.leftMotor, robot.rightMotor)
+    def displayText(self, x: int, y: int, text: str, color: object, backgroundColor = None):
+        try:
+            self.ev3.screen.draw_text(x, y, text, color, backgroundColor)
+        except:
+            raise UnableToWriteText(f"Unable to display {text}, it could be an error also from x: {x}, y: {y}, color: {color} or background color: {backgroundColor}", "402")
+        
+    def writeText(self, x: int, y: int, text: str, color: object, t: float, backgroundColor = None):
+        try:
+            self.ev3.screen.draw_text(x, y, text, color, backgroundColor)
+        except:
+            raise UnableToWriteText(f"Unable to display {text}, it could be an error also from x: {x}, y: {y}, color: {color}or background color: {backgroundColor}", "402")
+        try:
+            time.sleep(t)
+        except:
+            raise UnknownTimeArgument(f"{t} is not a valid time to sleep", "401")
+        self.ev3.screen.clear()
+    
+    def clearScreen(self):
+        self.ev3.screen.clear()
+        
+    def turnOnlights(self, color: object):
+        self.ev3.light.on(color)
+    
+    def turnOffLights(self):
+        self.ev3.light.off()
