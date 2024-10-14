@@ -20,3 +20,11 @@ sensors = {
 
 robot = Robot(56, 152, motors, sensors, "d")
 robot.declareDriveBase(robot.leftMotor, robot.rightMotor)
+robot.move("forward", 100)
+robot.move("backward", 100)
+robot.moveToOrientation(90)
+robot.startMoving(100, 100)
+robot.setMovementMotorsTo("hold")
+robot.setMovementMotorsTo("stop")
+robot.moveBySpeeds(100, 100, 100)
+robot.driveBySpeeds(100, 100)

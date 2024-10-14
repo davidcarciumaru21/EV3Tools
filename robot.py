@@ -16,7 +16,7 @@ class Robot:
         self.driveBaseName = driveBaseName
         self.errorLog = []
         self.init()
-        self.ev3 = EV3Brick()  # Initialize EV3 brick here
+        self.ev3 = EV3Brick()  
         self.ev3.screen.clear()
 
     def init(self):
@@ -45,10 +45,9 @@ class Robot:
                 print(error)
             raise self.errorLog[0]
 
-    # Modified to use the Ev3DriveBase instead of DriveBase
     def declareDriveBase(self, leftMotor: Motor, rightMotor: Motor,
                          straightSpeed=100, straightAcceleration=100, turnRate=100, turnAcceleration=100):
-        # Use Ev3DriveBase instead of DriveBase
+        
         setattr(self, self.driveBaseName, Ev3DriveBase(leftMotor, rightMotor, self.wheelDiameter, self.axleTrack))
         self.drivebase = getattr(self, self.driveBaseName)
         self.drivebase.settings(straightSpeed, straightAcceleration, turnRate, turnAcceleration)
@@ -56,18 +55,18 @@ class Robot:
     """
     def displayFace(self, face: object, displayTime: float):
         try:
-            self.ev3.screen.load_image(face)  # Use self.ev3 to access the EV3 brick
+            self.ev3.screen.load_image(face) 
         except:
             raise UnknownFace(f"{face} is not a valid face to display", "400")
         try:
-            time.sleep(displayTime)  # Use the time module for delays
+            time.sleep(displayTime) 
         except:
             raise UnknownTimeArgument(f"{displayTime} is not a valid time to sleep", "401")
-        self.ev3.screen.clear()  # Correct clearing method for the EV3 screen
+        self.ev3.screen.clear() 
         
     def displayFaceForever(self, face: object):
         try:
-            self.ev3.screen.load_image(face)  # Use self.ev3 to access the EV3 brick
+            self.ev3.screen.load_image(face) 
         except:
             raise UnknownFace(f"{face} is not a valid face to display", "400")
 

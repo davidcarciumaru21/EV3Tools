@@ -4,13 +4,10 @@ from errors import *
 
 class Ev3DriveBase(DriveBase):
     def __init__(self, leftMotor: Motor, rightMotor: Motor, wheelDiameter: float, axleTrack: float):
-        # Initialize parent class DriveBase with motor and geometry parameters
         super().__init__(leftMotor, rightMotor, wheelDiameter, axleTrack)
-        # Store references to the motors
         self.leftMotor = leftMotor
         self.rightMotor = rightMotor
         
-    # Move method to move the robot forward or backward
     def move(self, orientation: str, degrees: int):
         if orientation == "forward":
             self.straight(degrees)
@@ -39,7 +36,6 @@ class Ev3DriveBase(DriveBase):
 
     def setMovementMotorsTo(self, stopOrStall: str):
         try:
-            # Check the method to be called based on stopOrStall value
             if stopOrStall == "stop":
                 self.leftMotor.stop()
                 self.rightMotor.stop()
@@ -53,11 +49,23 @@ class Ev3DriveBase(DriveBase):
             
      
     def moveBySpeeds(self, degrees: int, speed1: int, speed2: int):
-        # Move both motors at different speeds for the given number of degrees
-        self.leftMotor.run_angle(speed1, degrees, wait=False)  # Move left motor
-        self.rightMotor.run_angle(speed2, degrees, wait=True)  # Move right motor and wait for it to finish
+    
+        try:
+            self.leftMotor.run_angle(speed1, degrees, wait=False)  
+        except: 
+            raise UnknownSpeed(f"Unknown speed {speed1} or degrees {degrees}", "500")
+        try:
+            self.rightMotor.run_angle(speed2, degrees, wait=True) 
+        except:
+            raise UnknownSpeed(f"Unknown speed {speed2} or degrees {degrees}", "501")
             
     def driveBySpeeds(self, speed1: int, speed2: int):
     
-        self.leftMotor.run(speed1)
-        self.rightMotor.run(speed2)
+        try:
+            self.leftMotor.run(speed1)
+        except:
+            raise UnknownSpeed(f"Unknown speed {speed1}", "500")
+        try:
+            self.rightMotor.run(speed2)
+        except:
+            raise UnknownSpeed(f"Unknown speed {speed2}", "501")
